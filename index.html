@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Udemy Course Monitor</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9', // Sky blue
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Loading Spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader {
+            border: 3px solid rgba(226, 232, 240, 0.3);
+            border-left-color: #0ea5e9;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Subtle Mesh Gradient Background */
+        .bg-mesh {
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+        }
+    </style>
+</head>
+
+<body class="bg-mesh font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div class="container mx-auto max-w-5xl px-4 md:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+                    U
+                </div>
+                <span class="font-bold text-lg tracking-tight text-slate-900">Course<span class="text-brand-600">Monitor</span></span>
+            </div>
+            <div class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                v2.0
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto max-w-5xl px-4 md:px-6 py-12 flex-grow">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-12 max-w-2xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+                Discover Free <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-indigo-600">Premium Courses</span>
+            </h1>
+            <p class="text-lg text-slate-600 leading-relaxed">
+                Automatically fetch and filter the latest 100% off coupons from top learning platforms. Never miss a free course again.
+            </p>
+        </div>
+
+        <!-- Controls Card -->
+        <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 p-1 mb-12 relative overflow-hidden">
+            <!-- Decorative top border -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 to-indigo-500"></div>
+            
+            <div class="p-6 md:p-8">
+                <label for="keywords-input" class="block text-sm font-semibold text-slate-700 mb-3 ml-1">
+                    Waitlist Keywords
+                </label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="keywords-input"
+                        class="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                        placeholder="e.g. python, react, marketing"
+                        value="python, javascript, management, excel, aws, react">
+                </div>
+                
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button id="filter-button"
+                        class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3.5 px-6 rounded-xl shadow-lg shadow-slate-900/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 group">
+                        <svg class="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span>Search Keywords</span>
+                    </button>
+                    
+                    <button id="today-button"
+                        class="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium py-3.5 px-6 rounded-xl hover:border-slate-300 hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Today's Arrivals</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div class="min-h-[200px]">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h2 id="results-title" class="text-2xl font-bold text-slate-900 hidden">Latest Results</h2>
+                <div id="loading-indicator" class="hidden flex items-center gap-3 px-4 py-2 bg-white rounded-full shadow-sm border border-slate-100">
+                    <div class="loader"></div>
+                    <span class="text-sm font-medium text-slate-600">Scanning feed...</span>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden rounded-xl bg-red-50 border border-red-100 p-4 mb-8 flex gap-3 items-start">
+                <svg class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <h3 class="text-sm font-bold text-red-800">Connection Error</h3>
+                    <p id="error-text" class="text-sm text-red-600 mt-1"></p>
+                </div>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Empty State (Initial) -->
+                <div class="col-span-full py-12 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 mb-4">
+                        <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    <p class="text-slate-500 text-lg">Ready to find some courses?</p>
+                    <p class="text-slate-400 text-sm mt-1">Click a button above to start searching.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+
+    <!-- Logic -->
+    <script>
+        // --- CONFIGURATION ---
+        const RSS_FEED_URL = "https://courses.impodays.com/feed/";
+        const PROXY_URL = 'https://api.codetabs.com/v1/proxy?quest=';
+        const FINAL_URL = PROXY_URL + RSS_FEED_URL;
+
+        // --- DOM ELEMENTS ---
+        const filterButton = document.getElementById('filter-button');
+        const keywordsInput = document.getElementById('keywords-input');
+        const coursesContainer = document.getElementById('courses-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const todayButton = document.getElementById('today-button');
+        const resultsTitle = document.getElementById('results-title');
+
+        // --- EVENT LISTENERS ---
+        filterButton.addEventListener('click', fetchAndDisplayCourses);
+        todayButton.addEventListener('click', fetchAndDisplayTodaysCourses);
+
+        // --- CORE APP FUNCTIONS ---
+
+        async function fetchAndDisplayCourses() {
+            loadingIndicator.classList.remove('hidden');
+            coursesContainer.innerHTML = ''; // Clear UI
+            errorMessage.classList.add('hidden');
+            setButtonsLoading(true, 'filter');
+            resultsTitle.textContent = "Fetching results...";
+            resultsTitle.classList.remove('hidden');
+
+            const keywords = keywordsInput.value
+                .split(',')
+                .map(k => k.trim().toLowerCase())
+                .filter(k => k.length > 0);
+
+            localStorage.setItem('courseMonitorKeywords', keywordsInput.value);
+
+            if (keywords.length === 0) {
+                showError("Please enter at least one keyword.");
+                setButtonsLoading(false);
+                return;
+            }
+
+            try {
+                const { xmlDoc, items } = await fetchAndParseFeed();
+                let foundCourses = [];
+                let htmlToRender = '';
+
+                items.forEach(item => {
+                    const titleElement = item.querySelector("title");
+                    const linkElement = item.querySelector("link");
+
+                    if (titleElement && linkElement) {
+                        const title = titleElement.textContent; // Keep original case for display
+                        const titleLower = title.toLowerCase();
+                        const link = linkElement.textContent;
+
+                        const matchingKeyword = keywords.find(keyword => {
+                            const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+                            return regex.test(titleLower);
+                        });
+
+                        if (matchingKeyword) {
+                            foundCourses.push({ 
+                                title: title, 
+                                link, 
+                                keyword: matchingKeyword
+                            });
+                        }
+                    }
+                });
+
+                renderResults(foundCourses, "Keyword Results");
+
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+                showError(error.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                setButtonsLoading(false);
+            }
+        }
+
+        async function fetchAndDisplayTodaysCourses() {
+            loadingIndicator.classList.remove('hidden');
+            coursesContainer.innerHTML = '';
+            errorMessage.classList.add('hidden');
+            setButtonsLoading(true, 'today');
+            resultsTitle.textContent = "Fetching today's courses...";
+            resultsTitle.classList.remove('hidden');
+
+            const today = new Date();
+
+            try {
+                const { xmlDoc, items } = await fetchAndParseFeed();
+                let foundCourses = [];
+
+                items.forEach(item => {
+                    const titleElement = item.querySelector("title");
+                    const linkElement = item.querySelector("link");
+                    const pubDateElement = item.querySelector("pubDate");
+
+                    if (titleElement && linkElement && pubDateElement) {
+                        const courseDate = new Date(pubDateElement.textContent);
+                        const isToday = courseDate.getFullYear() === today.getFullYear() &&
+                            courseDate.getMonth() === today.getMonth() &&
+                            courseDate.getDate() === today.getDate();
+
+                        if (isToday) {
+                            foundCourses.push({
+                                title: titleElement.textContent,
+                                link: linkElement.textContent,
+                                isNew: true
+                            });
+                        }
+                    }
+                });
+
+                renderResults(foundCourses, `Today's Arrivals`);
+
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+                showError(error.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                setButtonsLoading(false);
+            }
+        }
+
+        /**
+         * Reusable function to render cards
+         */
+        function renderResults(courses, titleText) {
+            if (courses.length > 0) {
+                resultsTitle.textContent = `${titleText} (${courses.length})`;
+                
+                let htmlToRender = '';
+                courses.forEach(course => {
+                    // Badge logic
+                    let badgeHtml = '';
+                    if (course.keyword) {
+                        badgeHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800 uppercase tracking-wide">${course.keyword}</span>`;
+                    } else if (course.isNew) {
+                        badgeHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 uppercase tracking-wide">New Arrival</span>`;
+                    }
+
+                    htmlToRender += `
+                        <a href="${course.link}" target="_blank" rel="noopener noreferrer" 
+                           class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 flex flex-col h-full">
+                            
+                            <div class="mb-4 flex justify-between items-start">
+                                ${badgeHtml}
+                                <svg class="w-5 h-5 text-slate-300 group-hover:text-brand-500 transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug group-hover:text-brand-600 transition-colors line-clamp-3">
+                                ${course.title}
+                            </h3>
+                            
+                            <div class="mt-auto pt-4 flex items-center gap-2 text-sm text-slate-500 font-medium">
+                                <span>View Course</span>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </div>
+                        </a>
+                    `;
+                });
+                coursesContainer.innerHTML = htmlToRender;
+            } else {
+                resultsTitle.textContent = titleText;
+                coursesContainer.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 mb-3">
+                            <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-slate-600 font-medium">No courses found.</p>
+                        <p class="text-slate-400 text-sm">Try adjusting your keywords or checking back later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Fetches and parses the RSS feed.
+         */
+        async function fetchAndParseFeed() {
+            const response = await fetch(FINAL_URL);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch feed. Status: ${response.status} ${response.statusText}`);
+            }
+            const xmlString = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+            
+            const parseError = xmlDoc.querySelector("parsererror");
+            if (parseError) {
+                console.error("XML Parse Error:", parseError);
+                throw new Error("Failed to parse the RSS feed. The feed might be invalid.");
+            }
+            
+            const items = xmlDoc.querySelectorAll("item");
+            return { xmlDoc, items };
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            loadingIndicator.classList.add('hidden');
+            setButtonsLoading(false);
+            resultsTitle.classList.add('hidden');
+        }
+
+        function setButtonsLoading(isLoading, activeButton = '') {
+            if (isLoading) {
+                filterButton.disabled = true;
+                todayButton.disabled = true;
+                filterButton.classList.add('opacity-75', 'cursor-not-allowed');
+                todayButton.classList.add('opacity-75', 'cursor-not-allowed');
+                
+                if (activeButton === 'filter') {
+                    filterButton.innerHTML = `
+                        <div class="w-5 h-5 border-2 border-white/30 border-l-white rounded-full animate-spin"></div>
+                        <span>Searching...</span>
+                    `;
+                } else if (activeButton === 'today') {
+                    todayButton.innerHTML = `
+                        <div class="w-5 h-5 border-2 border-brand-200 border-l-brand-500 rounded-full animate-spin"></div>
+                        <span>Searching...</span>
+                    `;
+                }
+            } else {
+                filterButton.disabled = false;
+                todayButton.disabled = false;
+                filterButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                todayButton.classList.remove('opacity-75', 'cursor-not-allowed');
+
+                filterButton.innerHTML = `
+                    <svg class="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>Search Keywords</span>
+                `;
+                todayButton.innerHTML = `
+                    <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Today's Arrivals</span>
+                `;
+            }
+        }
+
+        // Run this when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedKeywords = localStorage.getItem('courseMonitorKeywords');
+            if (savedKeywords) {
+                console.log("Found saved keywords, loading results...");
+                keywordsInput.value = savedKeywords;
+                fetchAndDisplayCourses();
+            } else {
+                console.log("No saved keywords found.");
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
